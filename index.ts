@@ -1,12 +1,15 @@
 import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
 import { ethers } from "ethers";
-import { Metadrobe } from "./typechain-types";
-
+import { InformationGetter, ERC721A } from "./typechain-types";
+import InformationGetterABI from "./InformationGetter.json";
 import MetaDrobeABI from "./Metadrobe.json";
 import { UrnStuff } from "./generalStuff";
+import { metadrobeMenHelper, metadrobeWomenHelper } from "./helperStuff";
+import { singularHelpMen, singularHelpWomen } from "./singularHelper";
 
-const collectionName = "metadrobewomen";
+const womenCollection = "metadrobewomen";
+const menCollection = "metadrobemen";
 
 dotenv.config();
 
@@ -18,58 +21,77 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.get(
-  "/registry/" + collectionName + "/address/:address/assets/:id",
+  "/registry/:collectionMeme/address/:address/assets",
   async (req: Request, res: Response) => {
-    const provider = new ethers.providers.JsonRpcProvider(
-      "https://polygon-rpc.com/"
-    );
-
-    const { registryId, address, id } = req.params;
-    res.send(
-      `Registry ID: ${registryId}, Address: ${address}, Asset ID: ${id}`
-    );
+    const { address, id, collectionMeme } = req.params;
+    try {
+      if (womenCollection === collectionMeme) {
+        const toSend = await metadrobeWomenHelper(address, womenCollection);
+        res.send(JSON.stringify(toSend));
+      } else if (menCollection === collectionMeme) {
+        const toSend = await metadrobeMenHelper(address, menCollection);
+        res.send(JSON.stringify(toSend));
+      } else {
+        res.send(
+          JSON.stringify({
+            address: address,
+            assets: [],
+            total: 0,
+            page: 1,
+            next: "",
+          })
+        );
+      }
+    } catch (err) {
+      console.error(err);
+      res.send(
+        JSON.stringify({
+          address: address,
+          assets: [],
+          total: 0,
+          page: 1,
+          next: "",
+        })
+      );
+    }
   }
 );
 
 app.get(
-  "/registry/" + collectionName + "/address/:address/assets",
+  "/registry/:collectionName/address/:address/assets/:id",
+
   async (req: Request, res: Response) => {
-    const { address, id } = req.params;
-    console.log("lol");
-    const provider = new ethers.providers.JsonRpcProvider(
-      "https://polygon-rpc.com/"
-    );
-    console.log("TF");
-    const contract = new ethers.Contract(
-      "0x4c1573189e308d0a4d8bec421082fa8e39eee58e",
-      MetaDrobeABI.abi,
-      provider
-    ) as Metadrobe;
-
-    const addressAssets = await contract.balanceOf(address);
-    const assetNumber = addressAssets.toNumber();
-
-    const assets: UrnStuff[] = [];
-
-    for (let i = 0; i < assetNumber; i++) {
-      const asset = await contract.tokenOfOwnerByIndex(address, i);
-      assets.push({
-        id: `0x4c1573189e308d0a4d8bec421082fa8e39eee58e${asset.toString()}`,
-        amount: 1,
-        urn: {
-          decentraland: `urn:decentraland:matic:collections-thirdparty:${collectionName}:0x4c1573189e308d0a4d8bec421082fa8e39eee58e:${asset.toString()}`,
-        },
-      });
+    const { address, id, collectionName } = req.params;
+    try {
+      if (collectionName === womenCollection) {
+        const toSend = await singularHelpWomen(id, womenCollection);
+        res.send(JSON.stringify(toSend));
+      } else if (collectionName === menCollection) {
+        const toSend = await singularHelpMen(id, menCollection);
+        res.send(JSON.stringify(toSend));
+      } else {
+        res.send(
+          JSON.stringify({
+            address: "0x4c1573189e308d0a4d8bec421082fa8e39eee58e",
+            amount: 0,
+            urn: {
+              decentraland: "",
+            },
+          })
+        );
+      }
+    } catch (err) {
+      console.error(err);
+      res.send(
+        JSON.stringify({
+          address: "0x4c1573189e308d0a4d8bec421082fa8e39eee58e",
+          amount: 0,
+          urn: {
+            decentraland: "",
+          },
+        })
+      );
     }
-
-    const toJson = {
-      address: address,
-      assets: assets,
-      total: assetNumber,
-      page: 1,
-    };
-
-    res.send(JSON.stringify(toJson));
   }
 );
 

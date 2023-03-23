@@ -14,46 +14,79 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const dotenv_1 = __importDefault(require("dotenv"));
-const ethers_1 = require("ethers");
-const Metadrobe_json_1 = __importDefault(require("./Metadrobe.json"));
-const collectionName = "metadrobewomen";
+const helperStuff_1 = require("./helperStuff");
+const singularHelper_1 = require("./singularHelper");
+const womenCollection = "metadrobewomen";
+const menCollection = "metadrobemen";
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const port = process.env.PORT;
 app.get("/", (req, res) => {
     res.send("Express + TypeScript Server");
 });
-app.get("/registry/" + collectionName + "/address/:address/assets/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const provider = new ethers_1.ethers.providers.JsonRpcProvider("https://polygon-rpc.com/");
-    const { registryId, address, id } = req.params;
-    res.send(`Registry ID: ${registryId}, Address: ${address}, Asset ID: ${id}`);
-}));
-app.get("/registry/" + collectionName + "/address/:address/assets", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { address, id } = req.params;
-    console.log("lol");
-    const provider = new ethers_1.ethers.providers.JsonRpcProvider("https://polygon-rpc.com/");
-    console.log("TF");
-    const contract = new ethers_1.ethers.Contract("0x4c1573189e308d0a4d8bec421082fa8e39eee58e", Metadrobe_json_1.default.abi, provider);
-    const addressAssets = yield contract.balanceOf(address);
-    const assetNumber = addressAssets.toNumber();
-    const assets = [];
-    for (let i = 0; i < assetNumber; i++) {
-        const asset = yield contract.tokenOfOwnerByIndex(address, i);
-        assets.push({
-            id: `0x4c1573189e308d0a4d8bec421082fa8e39eee58e${asset.toString()}`,
-            amount: 1,
-            urn: {
-                decentraland: `urn:decentraland:matic:collections-thirdparty:${collectionName}:0x4c1573189e308d0a4d8bec421082fa8e39eee58e:${asset.toString()}`,
-            },
-        });
+app.get("/registry/:collectionMeme/address/:address/assets", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { address, id, collectionMeme } = req.params;
+    try {
+        if (womenCollection === collectionMeme) {
+            const toSend = yield (0, helperStuff_1.metadrobeWomenHelper)(address, womenCollection);
+            res.send(JSON.stringify(toSend));
+        }
+        else if (menCollection === collectionMeme) {
+            const toSend = yield (0, helperStuff_1.metadrobeMenHelper)(address, menCollection);
+            res.send(JSON.stringify(toSend));
+        }
+        else {
+            res.send(JSON.stringify({
+                address: address,
+                assets: [],
+                total: 0,
+                page: 1,
+                next: "",
+            }));
+        }
     }
-    const toJson = {
-        address: address,
-        assets: assets,
-        total: assetNumber,
-        page: 1,
-    };
-    res.send(JSON.stringify(toJson));
+    catch (err) {
+        console.error(err);
+        res.send(JSON.stringify({
+            address: address,
+            assets: [],
+            total: 0,
+            page: 1,
+            next: "",
+        }));
+    }
+}));
+app.get("/registry/:collectionName/address/:address/assets/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { address, id, collectionName } = req.params;
+    try {
+        if (collectionName === womenCollection) {
+            const toSend = yield (0, singularHelper_1.singularHelpWomen)(id, womenCollection);
+            res.send(JSON.stringify(toSend));
+        }
+        else if (collectionName === menCollection) {
+            const toSend = yield (0, singularHelper_1.singularHelpMen)(id, menCollection);
+            res.send(JSON.stringify(toSend));
+        }
+        else {
+            res.send(JSON.stringify({
+                address: "0x4c1573189e308d0a4d8bec421082fa8e39eee58e",
+                amount: 0,
+                urn: {
+                    decentraland: "",
+                },
+            }));
+        }
+    }
+    catch (err) {
+        console.error(err);
+        res.send(JSON.stringify({
+            address: "0x4c1573189e308d0a4d8bec421082fa8e39eee58e",
+            amount: 0,
+            urn: {
+                decentraland: "",
+            },
+        }));
+    }
 }));
 app.listen(port, () => {
     console.log(`[server]: Server is running at http://localhost:${port}`);
