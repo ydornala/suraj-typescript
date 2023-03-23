@@ -1,5 +1,5 @@
 import express, { Express, Request, Response } from "express";
-import dotenv from "dotenv";
+
 import { ethers } from "ethers";
 import { InformationGetter, ERC721A } from "./typechain-types";
 import InformationGetterABI from "./InformationGetter.json";
@@ -11,10 +11,9 @@ import { singularHelpMen, singularHelpWomen } from "./singularHelper";
 const womenCollection = "metadrobewomen";
 const menCollection = "metadrobemen";
 
-dotenv.config();
+
 
 const app = express();
-const port = process.env.PORT;
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Express + TypeScript Server");
@@ -95,6 +94,6 @@ app.get(
   }
 );
 
-app.listen(port, () => {
-  console.log(`[server]: Server is running at http://localhost:${port}`);
+app.listen(3000, () => {
+  console.log(`[server]: Server is running at http://localhost:${3000}`);
 });
