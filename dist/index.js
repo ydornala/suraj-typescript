@@ -85,6 +85,6 @@ app.get("/registry/:collectionName/address/:address/assets/:id", (req, res) => _
         }));
     }
 }));
-app.listen(3000, () => {
-    console.log(`[server]: Server is running at http://localhost:${3000}`);
+app.listen(80, () => {
+    console.log(`[server]: Server is running at http://localhost:${80}`);
 });
