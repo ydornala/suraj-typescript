@@ -94,6 +94,6 @@ app.get(
   }
 );
 
-app.listen(80, () => {
-  console.log(`[server]: Server is running at http://localhost:${80}`);
+app.listen(3306, () => {
+  console.log(`[server]: Server is running at http://localhost:${3306}`);
 });
