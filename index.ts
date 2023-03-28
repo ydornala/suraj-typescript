@@ -11,15 +11,15 @@ import { singularHelpMen, singularHelpWomen } from "./singularHelper";
 const womenCollection = "metadrobewomen";
 const menCollection = "metadrobemen";
 
-
+const router = express.Router();
 
 const app = express();
 
-app.get("/", (req: Request, res: Response) => {
+router.get("/", (req: Request, res: Response) => {
   res.send("Express + TypeScript Server");
 });
 
-app.get(
+router.get(
   "/registry/:collectionMeme/address/:address/assets",
   async (req: Request, res: Response) => {
     const { address, id, collectionMeme } = req.params;
@@ -56,7 +56,7 @@ app.get(
   }
 );
 
-app.get(
+router.get(
   "/registry/:collectionName/address/:address/assets/:id",
 
   async (req: Request, res: Response) => {
