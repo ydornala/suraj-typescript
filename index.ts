@@ -94,6 +94,10 @@ router.get(
   }
 );
 
+const routerBasePath = `/.netlify/functions/`;
+
+app.use(routerBasePath, router);
+
 app.listen(3306, () => {
   console.log(`[server]: Server is running at http://localhost:${3306}`);
 });
