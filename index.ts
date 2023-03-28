@@ -1,5 +1,10 @@
 import express, { Express, Request, Response } from "express";
-import serverless from 'serverless-http'
+import serverless from 'serverless-http';
+import compression from 'compression';
+import cors from 'cors'
+import morgan from 'morgan'
+import bodyParser from 'body-parser'
+
 
 import { ethers } from "ethers";
 import { InformationGetter, ERC721A } from "./typechain-types";
@@ -14,10 +19,16 @@ const menCollection = "metadrobemen";
 
 const router = express.Router();
 
+router.use(compression())
+
 const app = express();
 
 router.get("/", (req: Request, res: Response) => {
   res.send("Express + TypeScript Server");
+});
+
+router.get('/hello/', function(req, res) {
+  res.send('hello world')
 });
 
 router.get(
@@ -98,6 +109,10 @@ router.get(
 const routerBasePath = `/.netlify/functions/`;
 
 app.use(routerBasePath, router);
+
+router.use(cors())
+router.use(bodyParser.json())
+router.use(bodyParser.urlencoded({ extended: true }))
 
 // app.listen(3306, () => {
 //   console.log(`[server]: Server is running at http://localhost:${3306}`);
