@@ -1,4 +1,5 @@
 import express, { Express, Request, Response } from "express";
+import serverless from 'serverless-http'
 
 import { ethers } from "ethers";
 import { InformationGetter, ERC721A } from "./typechain-types";
@@ -98,6 +99,8 @@ const routerBasePath = `/.netlify/functions/`;
 
 app.use(routerBasePath, router);
 
-app.listen(3306, () => {
-  console.log(`[server]: Server is running at http://localhost:${3306}`);
-});
+// app.listen(3306, () => {
+//   console.log(`[server]: Server is running at http://localhost:${3306}`);
+// });
+
+exports.handler = serverless(app);
